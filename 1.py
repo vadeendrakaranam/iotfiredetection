@@ -116,42 +116,30 @@ def send_email(image_path, alert_type):
 
 try:
     while True:
-        if not GPIO.input(MQ7_PIN) and not GPIO.input(FLAME_SENSOR_PIN):
-            print("No smoke or flame detected by sensors. Opening webcam to check...")
-            image_path = "/home/project/Desktop/FIRE_PREDICTION/flame_detection.jpg"
-            frame = capture_image(image_path)
-            if frame is not None:
-                flame_detected = analyze_flame(interpreter, image_path)
-                if flame_detected:
-                    alert_type = "No smoke or flame detected by sensors. Flame detected by webcam."
-                    send_email(image_path, alert_type)
-                    print("Alert sent!")
-                else:
-                    print("No flame detected by webcam.")
-        elif GPIO.input(FLAME_SENSOR_PIN):
+        if GPIO.input(FLAME_SENSOR_PIN):
             print("Flame detected by flame sensor.")
             image_path = "/home/project/Desktop/FIRE_PREDICTION/flame_detection.jpg"
             frame = capture_image(image_path)
             if frame is not None:
-                flame_detected = analyze_flame(interpreter, image_path)
-                alert_type = "Flame detected by flame sensor. Webcam analysis: " + ("Flame detected." if flame_detected else "No flame detected.")
+                alert_type = "Flame detected by flame sensor."
                 send_email(image_path, alert_type)
                 print("Alert sent!")
-            time.sleep(5)  # Sleep to avoid continuous alerts
-        elif GPIO.input(MQ7_PIN):
-            print("Smoke detected by MQ7 sensor.")
-            image_path = "/home/project/Desktop/FIRE_PREDICTION/smoke_detection.jpg"
-            frame = capture_image(image_path)
-            if frame is not None:
-                flame_detected = analyze_flame(interpreter, image_path)
-                alert_type = "Smoke detected by MQ7 sensor. Webcam analysis: " + ("Flame detected." if flame_detected else "No flame detected.")
+
+        print("Checking environment with webcam...")
+        image_path = "/home/project/Desktop/FIRE_PREDICTION/environment_check.jpg"
+        frame = capture_image(image_path)
+        if frame is not None:
+            flame_detected = analyze_flame(interpreter, image_path)
+            if flame_detected:
+                alert_type = "Flame detected by webcam during environment check."
                 send_email(image_path, alert_type)
                 print("Alert sent!")
-            time.sleep(5)  # Sleep to avoid continuous alerts
-        time.sleep(1)
+
+        time.sleep(5)  # Check environment every 5 seconds
 
 except KeyboardInterrupt:
     GPIO.cleanup()
+
 
 
 
