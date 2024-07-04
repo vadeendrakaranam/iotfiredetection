@@ -29,7 +29,7 @@ def load_tflite_model(model_path):
     return interpreter
 
 # Load your pre-trained TensorFlow Lite model
-model_path = '/path/to/your/model.tflite'  # Replace with your model path
+model_path = '/home/project/Desktop/FIRE PREDICTION/vww_96_grayscale_quantized.tflite'  # Adjust path if needed
 interpreter = load_tflite_model(model_path)
 
 # Function to read ADC value from MCP3008
@@ -106,7 +106,7 @@ try:
     while True:
         if not GPIO.input(MQ7_PIN) and not GPIO.input(FLAME_SENSOR_PIN):
             print("No smoke or flame detected by sensors. Opening webcam to check...")
-            image_path = "/home/pi/flame_detection.jpg"
+            image_path = "/home/pi/fire_detection_project/flame_detection.jpg"
             frame = capture_image(image_path)
             if frame is not None:
                 flame_detected = analyze_flame(interpreter, image_path)
@@ -118,9 +118,23 @@ try:
                     print("No flame detected by webcam.")
         elif GPIO.input(FLAME_SENSOR_PIN):
             print("Flame detected by flame sensor.")
+            image_path = "/home/pi/fire_detection_project/flame_detection.jpg"
+            frame = capture_image(image_path)
+            if frame is not None:
+                flame_detected = analyze_flame(interpreter, image_path)
+                alert_type = "Flame detected by flame sensor. Webcam analysis: " + ("Flame detected." if flame_detected else "No flame detected.")
+                send_email(image_path, alert_type)
+                print("Alert sent!")
             time.sleep(5)  # Sleep to avoid continuous alerts
         elif GPIO.input(MQ7_PIN):
             print("Smoke detected by MQ7 sensor.")
+            image_path = "/home/pi/fire_detection_project/smoke_detection.jpg"
+            frame = capture_image(image_path)
+            if frame is not None:
+                flame_detected = analyze_flame(interpreter, image_path)
+                alert_type = "Smoke detected by MQ7 sensor. Webcam analysis: " + ("Flame detected." if flame_detected else "No flame detected.")
+                send_email(image_path, alert_type)
+                print("Alert sent!")
             time.sleep(5)  # Sleep to avoid continuous alerts
         time.sleep(1)
 
