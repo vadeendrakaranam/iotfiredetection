@@ -60,8 +60,13 @@ def analyze_flame(interpreter, image_path, threshold=0.5):
     if image is None:
         print(f"Error: Could not read image from {image_path}")
         return False
-    
-    image_resized = cv2.resize(image, (input_details[0]['shape'][2], input_details[0]['shape'][1]))  # Resize to model input size
+
+    # Get model input details
+    input_shape = input_details[0]['shape']
+    height, width = input_shape[1], input_shape[2]
+
+    # Preprocess the image
+    image_resized = cv2.resize(image, (width, height))
     image_normalized = image_resized / 255.0  # Normalize pixel values
     input_data = np.expand_dims(image_normalized, axis=0).astype(np.float32)
 
@@ -144,3 +149,4 @@ try:
 
 except KeyboardInterrupt:
     GPIO.cleanup()
+
