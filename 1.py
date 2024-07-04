@@ -61,14 +61,17 @@ def analyze_flame(interpreter, image_path, threshold=0.5):
         print(f"Error: Could not read image from {image_path}")
         return False
 
+    # Convert the image to grayscale
+    image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
     # Get model input details
     input_shape = input_details[0]['shape']
     height, width = input_shape[1], input_shape[2]
 
     # Preprocess the image
-    image_resized = cv2.resize(image, (width, height))
+    image_resized = cv2.resize(image_gray, (width, height))
     image_normalized = image_resized / 255.0  # Normalize pixel values
-    input_data = np.expand_dims(image_normalized, axis=0).astype(np.float32)
+    input_data = np.expand_dims(np.expand_dims(image_normalized, axis=-1), axis=0).astype(np.float32)
 
     # Set input tensor
     interpreter.set_tensor(input_details[0]['index'], input_data)
@@ -149,4 +152,5 @@ try:
 
 except KeyboardInterrupt:
     GPIO.cleanup()
+
 
