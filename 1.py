@@ -109,21 +109,27 @@ def send_email(image_path, alert_type):
 
     server = smtplib.SMTP('smtp.gmail.com', 587)
     server.starttls()
-    server.login(fromaddr, "sbyg moce hlik nqwp")
+    server.login(fromaddr, "sbyg moce hlik nqwp")  # Replace with your app-specific password
     text = msg.as_string()
     server.sendmail(fromaddr, toaddr, text)
     server.quit()
 
 try:
+    flame_detected_by_sensor = False
+
     while True:
         if GPIO.input(FLAME_SENSOR_PIN):
             print("Flame detected by flame sensor.")
-            image_path = "/home/project/Desktop/FIRE_PREDICTION/flame_detection.jpg"
-            frame = capture_image(image_path)
-            if frame is not None:
-                alert_type = "Flame detected by flame sensor."
-                send_email(image_path, alert_type)
-                print("Alert sent!")
+            if not flame_detected_by_sensor:
+                image_path = "/home/project/Desktop/FIRE_PREDICTION/flame_detection.jpg"
+                frame = capture_image(image_path)
+                if frame is not None:
+                    alert_type = "Flame detected by flame sensor."
+                    send_email(image_path, alert_type)
+                    print("Alert sent!")
+                flame_detected_by_sensor = True
+        else:
+            flame_detected_by_sensor = False
 
         print("Checking environment with webcam...")
         image_path = "/home/project/Desktop/FIRE_PREDICTION/environment_check.jpg"
@@ -139,6 +145,7 @@ try:
 
 except KeyboardInterrupt:
     GPIO.cleanup()
+
 
 
 
